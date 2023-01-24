@@ -1,6 +1,7 @@
 import React, {useRef, useState} from 'react'
 import { Alert, Button, Container, FloatingLabel, Form } from 'react-bootstrap'
 import { NavLink } from 'react-router-dom';
+import axios from 'axios';
 import Loader from '../Layout/Loader';
 
 const UserForm = () => {
@@ -12,7 +13,6 @@ const UserForm = () => {
   const emailRef = useRef();
   const passwordRef = useRef();
   const nameRef = useRef();
- 
   const toggleLoginHandler = () => {
     setLogin(prev=>!prev);
   }
@@ -34,11 +34,23 @@ const UserForm = () => {
             setTimeout(()=>{setAlert(<></>)}, 3000)
           }
           else{
-            //signup backend logic
-            
+            setLoading(true);
+            let userObj = {
+              name: nameRef.current.value,
+              email: emailRef.current.value,
+              password: passwordRef.current.value
+            }
+            const res = await axios.post('http://localhost:4000/users/user-signup', userObj);
+            if(res.data.error){
+              throw new Error(res.data.error)
+            }else{
+              setAlert(<Alert variant='success'>Your account has been created! Login with new account :)</Alert>)
+              setTimeout(()=>{setAlert(<></>)}, 3000)
+            }
             emailRef.current.value = '';
             passwordRef.current.value = '';
             nameRef.current.value = '';
+            setLoading(false);
           }
         }catch(err){
           setAlert(<Alert variant='danger'>{err.message}</Alert>)
