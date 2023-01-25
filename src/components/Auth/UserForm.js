@@ -3,6 +3,8 @@ import { Alert, Button, Container, FloatingLabel, Form } from 'react-bootstrap'
 import { NavLink } from 'react-router-dom';
 import axios from 'axios';
 import Loader from '../Layout/Loader';
+import { useDispatch } from 'react-redux';
+import { authActions } from '../../store/AuthReducer';
 
 const UserForm = () => {
 
@@ -10,6 +12,7 @@ const UserForm = () => {
   const [login, setLogin] = useState(false);
   const [forgot, setForgot] = useState(false);
   const [loading, setLoading] = useState(false);
+  const dispatch = useDispatch();
   const emailRef = useRef();
   const passwordRef = useRef();
   const nameRef = useRef();
@@ -39,8 +42,8 @@ const UserForm = () => {
               name: nameRef.current.value,
               email: emailRef.current.value,
               password: passwordRef.current.value
-            }
-            const res = await axios.post('http://localhost:4000/users/user-signup', userObj);
+            }        
+            const res = await axios.post('http://localhost:4000/users/user-signup', userObj); //send signup request
             if(res.data.error){
               throw new Error(res.data.error)
             }else{
@@ -58,13 +61,24 @@ const UserForm = () => {
         }
       }else{
         try{
-          if(!emailRef.current.value && !passwordRef.current.value){
+          if(!emailRef.current.value || !passwordRef.current.value){
             setAlert(<Alert variant='danger'>Fill all the fields!</Alert>)
             setTimeout(()=>{setAlert(<></>)}, 3000)
           }
           else{
-            //login backend logic
-
+            let userObj = {
+              email: emailRef.current.value,
+              password: passwordRef.current.value
+            }        
+            const res = await axios.post('http://localhost:4000/users/user-login', userObj) //send login request
+            //check for errors
+            if(!res.data){
+              throw new Error('Network error!');
+            }else if(res.data.error){
+              throw new Error(res.data.error);
+            }else{
+              dispatch(authActions.login({email: res.data.email})); //intialize central user state
+            }
             emailRef.current.value = '';
             passwordRef.current.value = '';
           }
