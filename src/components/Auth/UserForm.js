@@ -27,6 +27,7 @@ const UserForm = () => {
   const submitHandler = async(e) => {
     e.preventDefault();
       if(!login){
+        
         try{
           if(!emailRef.current.value || !passwordRef.current.value || !nameRef.current.value){
             setAlert(<Alert variant='danger'>Fill all the fields!</Alert>)
@@ -47,7 +48,7 @@ const UserForm = () => {
             if(res.data.error){
               throw new Error(res.data.error)
             }else{
-              setAlert(<Alert variant='success'>Your account has been created! Login with new account :)</Alert>)
+              setAlert(<Alert variant='success'>{res.data.msg}</Alert>)
               setTimeout(()=>{setAlert(<></>)}, 3000)
             }
             emailRef.current.value = '';
@@ -59,6 +60,7 @@ const UserForm = () => {
           setAlert(<Alert variant='danger'>{err.message}</Alert>)
           setTimeout(()=>{setAlert(<></>)}, 3000)
         }
+
       }else{
         try{
           if(!emailRef.current.value || !passwordRef.current.value){
@@ -74,8 +76,8 @@ const UserForm = () => {
             //check for errors
             if(!res.data){
               throw new Error('Network error!');
-            }else if(res.data.error){
-              throw new Error(res.data.error);
+            }else if(res.data.err){
+              throw new Error(res.data.err);
             }else{
               dispatch(authActions.login({email: res.data.email})); //intialize central user state
             }
