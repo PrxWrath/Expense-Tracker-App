@@ -79,7 +79,7 @@ const UserForm = () => {
             }else if(res.data.err){
               throw new Error(res.data.err);
             }else{
-              dispatch(authActions.login({email: res.data.email})); //intialize central user state
+              dispatch(authActions.login({token: res.data.token})); //intialize central user state
             }
             emailRef.current.value = '';
             passwordRef.current.value = '';

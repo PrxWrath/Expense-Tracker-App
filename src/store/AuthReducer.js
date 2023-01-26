@@ -1,19 +1,19 @@
 import {createSlice} from '@reduxjs/toolkit';
 
-const email = localStorage.getItem('EMAIL');
-const initialState = {isLoggedIn: !!email, loginEmail:email};
+const token = localStorage.getItem('LOGIN_TOKEN');
+const initialState = {isLoggedIn: !!token, loginToken:token};
 
 const authSlice = createSlice({
     name:'Authentication',
     initialState,
     reducers:{
         login(state, action){
-            state.loginEmail = action.payload.email;
-            localStorage.setItem('EMAIL', action.payload.email);
+            state.loginToken = action.payload.token;
+            localStorage.setItem('LOGIN_TOKEN', state.loginToken);
             state.isLoggedIn = true;
         },
         logout(state){
-            state.email = '';
+            state.loginToken = '';
             state.isLoggedIn = false;
             localStorage.clear();
         }

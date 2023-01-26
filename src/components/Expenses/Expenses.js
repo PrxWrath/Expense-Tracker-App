@@ -4,9 +4,11 @@ import ExpenseForm from './ExpenseForm'
 import ExpenseList from './ExpenseList'
 import Loader from '../Layout/Loader'
 import axios from 'axios'
+import { useSelector } from 'react-redux';
 
 const Expenses = () => {
   const [loading, setLoading] = useState(false);
+  const token = useSelector(state=>state.auth.loginToken);
   const [expenses, setExpenses] = useState([]); 
   const [load, setLoad] = useState(true);
   const [edited, setEdited] = useState(null);
@@ -14,11 +16,19 @@ const Expenses = () => {
 //load from backend
   async function loadExpenses(){
     setLoading(true);
-    const res = await axios.get('http://localhost:4000/expenses');
-    if(res.data){
-      setExpenses(res.data.reverse());
-    }
     setLoading(false);
+    try{
+      const res = await axios.get('http://localhost:4000/expenses', {headers: {
+        'Authorization' : token
+      }});
+      
+      if(res.data){
+        setExpenses(res.data.reverse());
+      }
+    }catch(err){
+      console.log(err);
+    }
+    
   }
   useEffect(()=>{    
     loadExpenses()

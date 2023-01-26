@@ -1,5 +1,10 @@
 const User = require('../models/user');
 const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
+
+const generateToken = (id, name) => {
+    return jwt.sign({userId: id, name}, 'A344525etee%2@33362djsbasshhf'); //encrypt the userID to produce a unique token
+}
 
 exports.postAddUser = async(req,res,next) => {
     try{
@@ -34,7 +39,8 @@ exports.postFindUser = async(req,res,next) => {
                 if(!cmp){
                     res.json({err: 'Invalid Credentials! User not authorized'}).status(401);
                 }else{
-                    res.status(200).json({email: data.email, msg:'User login successfull'});
+                    const token = generateToken(data.id, data.name);
+                    res.status(200).json({token: token, msg:'User login successfull'}); //send login token
                 }
             })
         }

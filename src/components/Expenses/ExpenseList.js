@@ -2,8 +2,10 @@ import React from "react";
 import { Button, ListGroup, Alert } from "react-bootstrap";
 import classes from './ExpenseList.module.css';
 import axios from "axios";
+import { useSelector } from "react-redux";
 
 const ExpenseList = (props) => {
+    const token = useSelector(state=>state.auth.loginToken)
     const onEdit = (expense) => {
         props.setExpenses(prev=>[...prev.filter(e=>e.id !==expense.id)]);
         props.setEdited(expense);
@@ -14,7 +16,9 @@ const ExpenseList = (props) => {
         let expenseId = {
           id: expense.id
         }
-        const res = await axios.post('http://localhost:4000/expenses/delete-expense',expenseId);
+        const res = await axios.post('http://localhost:4000/expenses/delete-expense',expenseId, {headers: {
+          'Authorization' : token
+        }});
         if(res.status === 200){
             props.setLoad(prev=>!prev);
         }

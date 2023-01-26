@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react'
 import { Alert, Button, FloatingLabel, Form } from 'react-bootstrap'
 import axios from 'axios';
+import { useSelector } from 'react-redux';
 
 const ExpenseForm = (props) => {
     
@@ -8,6 +9,7 @@ const ExpenseForm = (props) => {
     const descRef = useRef();
     const categoryRef = useRef();
     const [alert, setAlert] = useState(<></>);
+    const token = useSelector(state=>state.auth.loginToken);
 
     useEffect(()=>{
         if(props.edited){
@@ -32,7 +34,9 @@ const ExpenseForm = (props) => {
                         category: categoryRef.current.value,
                         description: descRef.current.value
                     }
-                    res = await axios.post('http://localhost:4000/expenses/add-expense', expense);
+                    res = await axios.post('http://localhost:4000/expenses/add-expense', expense, {headers: {
+                        'Authorization' : token
+                      }});
                 }else{
                     let expense = {
                         id: props.edited.id,
@@ -40,7 +44,9 @@ const ExpenseForm = (props) => {
                         category: categoryRef.current.value,
                         description: descRef.current.value
                     }
-                    res = await axios.post('http://localhost:4000/expenses/edit-expense', expense);
+                    res = await axios.post('http://localhost:4000/expenses/edit-expense', expense, {headers: {
+                        'Authorization' : token
+                      }});
                     props.setEdited(null);
                 }
 
