@@ -3,6 +3,7 @@ import { Route, Switch} from "react-router-dom";
 import Header from "./components/Layout/NavHeader";
 import Loader from "./components/Layout/Loader";
 import { useSelector } from "react-redux";
+import Expenses from "./components/Expenses/Expenses";
 
 const UserForm = React.lazy(()=>import("./components/Auth/UserForm"));
 const App = () => {
@@ -14,7 +15,12 @@ const App = () => {
       <Suspense fallback={<Loader/>}>
         <Switch>
           <Route exact path='/auth'>
-            {!isLoggedIn&&<UserForm/>}      
+            {!isLoggedIn&&<UserForm/>}
+            {isLoggedIn&& <Expenses/>}
+          </Route>
+          <Route exact path='/'>
+            {!isLoggedIn&&<UserForm/>}
+            {isLoggedIn&& <Expenses/>}
           </Route>
         </Switch>
       </Suspense>
