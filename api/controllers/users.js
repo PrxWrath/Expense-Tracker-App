@@ -1,6 +1,8 @@
 const User = require('../models/user');
+const ForgotRequest = require('../models/Forgot');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
+const {v4: uuid4} = require('uuid');
 
 const generateToken = (id, name) => {
     return jwt.sign({userId: id, name}, process.env.REACT_APP_USER_SECRET); //encrypt the userID to produce a unique token
@@ -51,9 +53,15 @@ exports.postFindUser = async(req,res,next) => {
 
 exports.postForgotPassword = async(req,res,next) => {
     try{
-        const user = await User.findOne({where:{email:req.body.email}});
+        const user = await User.findOne({where:{email:req.body.email}}); 
         if(user){
-            res.status(200).json({url:'http://localhost:4000/users/reset-password/dummy-id'});
+            let reset_id = uuid4();
+            //create new reset password request
+            await user.createForgotpassword({
+                id:reset_id,
+                isActive: true
+            });
+            res.status(200).json({url:`http://localhost:4000/users/reset-password/${reset_id}`});
         }else{
             res.json({err:'User not found!'});
         }
@@ -61,4 +69,43 @@ exports.postForgotPassword = async(req,res,next) => {
         console.log(err)
     }
     
+}
+
+exports.getResetPassword = async(req,res,next) => {
+    try{
+        
+        //send form to reset password
+        res.send(`
+        <h3>
+            Enter new password:
+        </h3>
+        <form action='/users/reset-password' method="POST">
+            <input type="text" name="new_pass"/>
+            <input type="hidden" name="reset_id" value="${req.params.reset_id}"/>
+            <button type="submit">Reset Password</button>
+        </form>`)
+    }catch(err){
+        console.log(err)
+    }  
+}
+
+exports.postResetPassword = async(req,res,next) => {
+    try{   
+        console.log(req.body)
+        const reset_id = req.body.reset_id;
+        const reset_pass = req.body.new_pass;
+        const request = await ForgotRequest.findOne({where:{id:reset_id}}); //find the request with the given uuid
+        if(request){
+            request.isActive = false; //one-time reset request
+            const user = await User.findOne({where:{id:request.userId}});
+            bcrypt.hash(reset_pass, 10, async(err, hash)=>{
+                user.password = hash
+                await user.save();   
+            })
+            await request.save();
+            res.send('<h3>Password Changed! Go back and login with new password</h3>') 
+        }
+    }catch(err){
+        console.log(err)
+    }
 }

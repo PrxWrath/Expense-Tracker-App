@@ -102,7 +102,7 @@ const UserForm = () => {
       if(res.data.err){
         throw new Error(res.data.err);
       }else{
-        setAlert(<Alert variant='primary'>Your password reset URL: <a href={res.data.url}>Click Here!</a></Alert>)  
+        setAlert(<Alert variant='primary'>Your password reset URL: <a href={res.data.url} target="_blank" rel="noreferrer">Click Here!</a></Alert>)  
       }
       emailRef.current.value = '';
     }catch(err){
