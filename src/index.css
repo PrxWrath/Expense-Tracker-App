@@ -17,3 +17,8 @@ body {
   height: 120vh;
   margin: 0;
 }
+
+.userForm{
+  background: url('./resources/userFormBg.jpg') no-repeat;
+  background-size: cover;
+}

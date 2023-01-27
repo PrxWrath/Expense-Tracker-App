@@ -1,10 +1,11 @@
 import React, {useRef, useState} from 'react'
-import { Alert, Button, Container, FloatingLabel, Form } from 'react-bootstrap'
+import { Alert, Button, Container, FloatingLabel, Form, Row, Col } from 'react-bootstrap'
 import { NavLink, useHistory } from 'react-router-dom';
 import axios from 'axios';
 import Loader from '../Layout/Loader';
 import { useDispatch } from 'react-redux';
 import { authActions } from '../../store/AuthReducer';
+
 
 const UserForm = () => {
 
@@ -98,7 +99,11 @@ const UserForm = () => {
   const passwordResetHandler = async() => {
     try{
       const res = await axios.post('http://localhost:4000/users/forgot-password', {email: emailRef.current.value});
-      console.log(res.status);
+      if(res.data.err){
+        throw new Error(res.data.err);
+      }else{
+        setAlert(<Alert variant='primary'>Your password reset URL: <a href={res.data.url}>Click Here!</a></Alert>)  
+      }
       emailRef.current.value = '';
     }catch(err){
       setAlert(<Alert variant='danger'>{err.message}</Alert>)
@@ -107,13 +112,15 @@ const UserForm = () => {
   }
 
    return (
-    <Container style={{paddingTop:'8rem'}}>
-        <div className='w-50 mx-auto my-1'>
+    <Container style={{paddingTop:'6rem', height: '100vh'}}>
+        <div className='w-75 fw-bold text-center mx-auto my-1'>
             {alert}
         </div>
-        <div className='d-flex w-50 shadow-lg rounded mx-auto border border-success'>
-          <img src={require('../../resources/userFormBg.jpg')} alt='signup bg' className="w-50"/>
-          <Form className='w-50 mx-auto p-3 my-1 text-success' onSubmit={submitHandler}>
+        <div className='w-100 h-100 p-5 mx-auto border border-success userForm'>
+          <Row>
+            <Col xs lg='6' className="mx-auto">
+
+            <Form className='bg-light shadow-lg rounded p-3 my-5 text-success' onSubmit={submitHandler}>
               {!forgot?
               <>
                 <h3 className='mx-auto my-2 mb-3 w-50 border-bottom border-success text-center'>{login?'Login':'Signup'}</h3>
@@ -145,7 +152,7 @@ const UserForm = () => {
               <>
                 <h3 className='mx-auto my-2 mb-5 w-75 border-bottom border-success text-center'>Forgot Password?</h3>
                 <Form.Group className='mb-5'>
-                  <Form.Label className='mb-1 fw-bold'>Enter you registered email id</Form.Label> 
+                  <Form.Label className='mb-1 fw-bold'>Enter your registered email id</Form.Label> 
                   <Form.Control type='email' ref={emailRef}/>
                 </Form.Group>
                 {loading?
@@ -159,8 +166,12 @@ const UserForm = () => {
                     <Button variant='outline-success' size='md' onClick={togglePasswordReset}>Back to Login</Button>
                 </div>
               </>
-            }
-          </Form>
+              }
+            </Form>
+
+            </Col>
+          </Row>
+          
         </div>
     </Container>
   )

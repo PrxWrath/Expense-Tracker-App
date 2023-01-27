@@ -50,5 +50,15 @@ exports.postFindUser = async(req,res,next) => {
 }
 
 exports.postForgotPassword = async(req,res,next) => {
-    //forgot password logic
+    try{
+        const user = await User.findOne({where:{email:req.body.email}});
+        if(user){
+            res.status(200).json({url:'http://localhost:4000/users/reset-password/dummy-id'});
+        }else{
+            res.json({err:'User not found!'});
+        }
+    }catch(err){
+        console.log(err)
+    }
+    
 }
