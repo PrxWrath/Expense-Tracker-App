@@ -16,7 +16,6 @@ const App = () => {
         <Switch>
           <Route exact path='/auth'>
             {!isLoggedIn&&<UserForm/>}
-            {isLoggedIn&& <Expenses/>}
           </Route>
           <Route exact path='/'>
             {!isLoggedIn&&<UserForm/>}

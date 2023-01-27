@@ -1,7 +1,7 @@
 import {createSlice} from '@reduxjs/toolkit';
 
 const token = localStorage.getItem('LOGIN_TOKEN');
-const initialState = {isLoggedIn: !!token, loginToken:token};
+const initialState = {isLoggedIn: !!token, loginToken:token, premiumUser: null};
 
 const authSlice = createSlice({
     name:'Authentication',
@@ -9,6 +9,7 @@ const authSlice = createSlice({
     reducers:{
         login(state, action){
             state.loginToken = action.payload.token;
+            state.premiumUser = action.payload.premium;
             localStorage.setItem('LOGIN_TOKEN', state.loginToken);
             state.isLoggedIn = true;
         },
@@ -16,6 +17,9 @@ const authSlice = createSlice({
             state.loginToken = '';
             state.isLoggedIn = false;
             localStorage.clear();
+        },
+        activatePremium(state){
+            state.premiumUser = true;
         }
     }
 })

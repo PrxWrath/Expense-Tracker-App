@@ -1,10 +1,11 @@
-import React, { useEffect, useState } from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
 import { Col, Container, Row } from 'react-bootstrap'
 import ExpenseForm from './ExpenseForm'
 import ExpenseList from './ExpenseList'
 import Loader from '../Layout/Loader'
 import axios from 'axios'
 import { useSelector } from 'react-redux';
+import Features from './Features'
 
 const Expenses = () => {
   const [loading, setLoading] = useState(false);
@@ -14,7 +15,7 @@ const Expenses = () => {
   const [edited, setEdited] = useState(null);
 
 //load from backend
-  async function loadExpenses(){
+  const loadExpenses = useCallback(async()=>{
     setLoading(true);
     setLoading(false);
     try{
@@ -27,16 +28,17 @@ const Expenses = () => {
       }
     }catch(err){
       console.log(err);
-    }
-    
-  }
+    }  
+  },[token]);
+
   useEffect(()=>{    
     loadExpenses()
-  }, [load]);
+  }, [load, loadExpenses]);
 
   
   return (
     <Container fluid style={{paddingTop:'5rem'}}> 
+          <Features/>
           <Row>
             <Col xs lg="6" className='mx-auto'>
               <ExpenseForm setLoad = {setLoad} edited={edited} setEdited = {setEdited}/>

@@ -1,6 +1,6 @@
 import React, {useRef, useState} from 'react'
 import { Alert, Button, Container, FloatingLabel, Form } from 'react-bootstrap'
-import { NavLink } from 'react-router-dom';
+import { NavLink, useHistory } from 'react-router-dom';
 import axios from 'axios';
 import Loader from '../Layout/Loader';
 import { useDispatch } from 'react-redux';
@@ -13,13 +13,14 @@ const UserForm = () => {
   const [forgot, setForgot] = useState(false);
   const [loading, setLoading] = useState(false);
   const dispatch = useDispatch();
+  const history = useHistory();
   const emailRef = useRef();
   const passwordRef = useRef();
   const nameRef = useRef();
   const toggleLoginHandler = () => {
     setLogin(prev=>!prev);
   }
-
+  
   const togglePasswordReset = () => {
     setForgot(prev=>!prev);
   }
@@ -79,7 +80,8 @@ const UserForm = () => {
             }else if(res.data.err){
               throw new Error(res.data.err);
             }else{
-              dispatch(authActions.login({token: res.data.token})); //intialize central user state
+              dispatch(authActions.login({token: res.data.token, premium: res.data.premium})); //intialize central user state
+              history.replace('/')
             }
             emailRef.current.value = '';
             passwordRef.current.value = '';
