@@ -5,6 +5,7 @@ const sequelize = require('./util/database');
 const userRoute = require('./routes/users');
 const expenseRoute = require('./routes/expenses');
 const purchaseRoute = require('./routes/purchase');
+const premiumRoute = require('./routes/premium');
 const User = require('./models/user');
 const Expense = require('./models/Expense');
 const Order = require('./models/Order');
@@ -17,6 +18,7 @@ app.use(bodyParser.json({extended:false}));
 app.use('/users', userRoute);
 app.use('/expenses', expenseRoute);
 app.use('/purchase', purchaseRoute);
+app.use('/premium', premiumRoute);
 app.use((req,res,next)=>{
     res.send('<h1>Backend Running :)</h1>');
 })

@@ -6,6 +6,7 @@ import Loader from '../Layout/Loader'
 import axios from 'axios'
 import { useSelector } from 'react-redux';
 import Features from './Features'
+import LeaderBoard from './LeaderBoard'
 
 const Expenses = () => {
   const [loading, setLoading] = useState(false);
@@ -13,6 +14,8 @@ const Expenses = () => {
   const [expenses, setExpenses] = useState([]); 
   const [load, setLoad] = useState(true);
   const [edited, setEdited] = useState(null);
+  const [showLeader, setShowLeader] = useState(false);
+  const [leaderData, setLeaderData] = useState(null);
 
 //load from backend
   const loadExpenses = useCallback(async()=>{
@@ -38,7 +41,8 @@ const Expenses = () => {
   
   return (
     <Container fluid style={{paddingTop:'5rem'}}> 
-          <Features/>
+          <Features setShowLeader = {setShowLeader} setLeaderData = {setLeaderData} />
+          <LeaderBoard showLeader={showLeader} setShowLeader={setShowLeader} leaderData = {leaderData}/>
           <Row>
             <Col xs lg="6" className='mx-auto'>
               <ExpenseForm setLoad = {setLoad} edited={edited} setEdited = {setEdited}/>
