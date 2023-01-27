@@ -47,5 +47,8 @@ exports.postFindUser = async(req,res,next) => {
     }catch(err){
         console.log(err)
     }
+}
 
+exports.postForgotPassword = async(req,res,next) => {
+    //forgot password logic
 }

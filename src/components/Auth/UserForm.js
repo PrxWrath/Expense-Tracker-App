@@ -96,7 +96,14 @@ const UserForm = () => {
   };
 
   const passwordResetHandler = async() => {
-    //forgot password logic    
+    try{
+      const res = await axios.post('http://localhost:4000/users/forgot-password', {email: emailRef.current.value});
+      console.log(res.status);
+      emailRef.current.value = '';
+    }catch(err){
+      setAlert(<Alert variant='danger'>{err.message}</Alert>)
+      setTimeout(()=>{setAlert(<></>)}, 3000)
+    }  
   }
 
    return (
