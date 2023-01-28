@@ -7,6 +7,7 @@ import axios from 'axios'
 import { useSelector } from 'react-redux';
 import Features from './Features'
 import LeaderBoard from './LeaderBoard'
+import ExpenseReport from './ExpenseReport'
 
 const Expenses = () => {
   const [loading, setLoading] = useState(false);
@@ -16,6 +17,7 @@ const Expenses = () => {
   const [edited, setEdited] = useState(null);
   const [showLeader, setShowLeader] = useState(false);
   const [leaderData, setLeaderData] = useState(null);
+  const [showReport, setShowReport] = useState(false);
 
 //load from backend
   const loadExpenses = useCallback(async()=>{
@@ -41,19 +43,25 @@ const Expenses = () => {
   
   return (
     <Container fluid style={{paddingTop:'5rem'}}> 
-          <Features setShowLeader = {setShowLeader} setLeaderData = {setLeaderData} />
+          <Features setShowLeader = {setShowLeader} setLeaderData = {setLeaderData} setShowReport={setShowReport}/>
           <LeaderBoard showLeader={showLeader} setShowLeader={setShowLeader} leaderData = {leaderData}/>
-          <Row>
-            <Col xs lg="6" className='mx-auto'>
-              <ExpenseForm setLoad = {setLoad} edited={edited} setEdited = {setEdited}/>
-            </Col>
-          </Row>
-          {loading&&<Loader className='my-3 mx-auto'/>}
-          <Row>
-            <Col xs lg="5" className='mx-auto'>
-              <ExpenseList expenses={expenses} setLoad = {setLoad} setEdited={setEdited} setExpenses = {setExpenses}/>
-            </Col>
-          </Row>
+          {!showReport?
+            <>
+            <Row>
+              <Col xs lg="6" className='mx-auto'>
+                <ExpenseForm setLoad = {setLoad} edited={edited} setEdited = {setEdited}/>
+              </Col>
+            </Row>
+            {loading&&<Loader className='my-3 mx-auto'/>}
+            <Row>
+              <Col xs lg="5" className='mx-auto'>
+               <ExpenseList expenses={expenses} setLoad = {setLoad} setEdited={setEdited} setExpenses = {setExpenses}/>
+              </Col>
+            </Row>
+            </>
+            :
+            <ExpenseReport expenses={expenses} setShowReport = {setShowReport}/>
+          }
     </Container>
   )
 }
