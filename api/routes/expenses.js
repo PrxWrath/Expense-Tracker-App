@@ -7,5 +7,7 @@ router.get('/', userAuth.authenticate, expenseController.getExpenses);
 router.post('/add-expense', userAuth.authenticate, expenseController.postAddExpense);
 router.post('/delete-expense',  expenseController.postDeleteExpense);
 router.post('/edit-expense',  expenseController.postEditExpense);
+router.get('/download', userAuth.authenticate, expenseController.getDownloadExpenses)
+router.get('/previous-downloads', userAuth.authenticate, expenseController.getFileUrls)
 
 module.exports = router;

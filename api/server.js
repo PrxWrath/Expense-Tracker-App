@@ -10,6 +10,7 @@ const User = require('./models/user');
 const Expense = require('./models/Expense');
 const Order = require('./models/Order');
 const ForgotRequest = require('./models/Forgot');
+const File = require('./models/File');
 require('dotenv').config();
 
 const app = express();
@@ -31,6 +32,9 @@ User.hasMany(Order);
 Order.belongsTo(User);
 User.hasMany(ForgotRequest);
 ForgotRequest.belongsTo(User);
+User.hasMany(File);
+File.belongsTo(User);
+
 sequelize.sync().then(res=>{
     app.listen(4000);
 })

@@ -1,6 +1,6 @@
 import axios from 'axios'
 import React from 'react'
-import { Button, Container, Alert } from 'react-bootstrap';
+import { Button, Container } from 'react-bootstrap';
 import { useDispatch, useSelector } from 'react-redux';
 import { authActions } from '../../store/AuthReducer';
 
