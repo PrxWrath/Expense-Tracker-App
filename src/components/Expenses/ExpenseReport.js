@@ -1,4 +1,4 @@
-import React, {useState} from 'react'
+import React, {useState, useEffect, useCallback} from 'react'
 import { Button, Row, Col } from 'react-bootstrap'
 import Table from 'react-bootstrap/Table'
 import { useSelector } from 'react-redux';
@@ -11,9 +11,28 @@ const ExpenseReport = (props) => {
   const token = useSelector(state=>state.auth.loginToken);
   const [showDownloads, setShowDownloads] = useState(false);
   const [downloads, setDownloads] = useState(null);
+  const [expenses, setExpenses] = useState([]);
+
+  const loadExpenses = useCallback(async()=>{
+    try{
+      const res = await axios.get('http://localhost:4000/expenses', {headers: {
+        'Authorization' : token
+      }});
+      
+      if(res.data){
+        setExpenses(res.data.reverse());
+      }
+    }catch(err){
+      console.log(err);
+    }  
+  },[token]);
+
+  useEffect(()=>{    
+    loadExpenses()
+  }, [loadExpenses]);
 
   //filter out monthly expenses
-  const monthly = props.expenses?.filter(expense=>{
+  const monthly = expenses?.filter(expense=>{
     return new Date(expense.updatedAt).toLocaleString("en-US", {month:'long'}) === month;
   })
   
@@ -22,7 +41,7 @@ const ExpenseReport = (props) => {
   },0);
 
   //filter out yearly expenses
-  const yearly = props.expenses?.filter(expense=>{
+  const yearly = expenses?.filter(expense=>{
     return new Date(expense.updatedAt).toLocaleString("en-US", {year:'numeric'}) === year;
   })
   
@@ -30,6 +49,7 @@ const ExpenseReport = (props) => {
     return initial += expense.amount
   },0);
   
+
   //get file download URL
   const  downloadHandler = async() => {
     try{

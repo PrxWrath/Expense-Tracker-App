@@ -38,6 +38,26 @@ exports.getExpenses = async(req,res,next) => {
     }
 }
 
+exports.getPaginatedExpenses = async(req,res,next) => {
+    try{
+        const user = req.user;
+        const limit = +req.params.limit;
+        const data = await user.getExpenses({offset:(req.params.page-1)*limit, limit:limit});
+        const count  = await user.countExpenses();
+        if(data){
+            let pages;
+            if(count%limit === 0){
+                pages = count/limit
+            }else{
+                pages = count/(limit - 1) 
+            }
+            res.json({expenses:data, pages});
+        }
+    }catch(err){
+        console.log(err);
+    }
+}
+
 exports.postAddExpense = async(req,res,next) => {
     try{
         const user = req.user;

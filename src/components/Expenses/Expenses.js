@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useState } from 'react'
-import { Col, Container, Row } from 'react-bootstrap'
+import { Col, Container, Pagination, Row } from 'react-bootstrap'
 import ExpenseForm from './ExpenseForm'
 import ExpenseList from './ExpenseList'
 import Loader from '../Layout/Loader'
@@ -18,29 +18,45 @@ const Expenses = () => {
   const [showLeader, setShowLeader] = useState(false);
   const [leaderData, setLeaderData] = useState(null);
   const [showReport, setShowReport] = useState(false);
-
+  const [page, setPage] = useState(1);
+  const [pages, setPages] = useState(1);
+  
+  
 //load from backend
   const loadExpenses = useCallback(async()=>{
     setLoading(true);
-    setLoading(false);
     try{
-      const res = await axios.get('http://localhost:4000/expenses', {headers: {
+      //get expense page as specified
+      const res = await axios.get(`http://localhost:4000/expenses/paginated/${page}/3`, {headers: {
         'Authorization' : token
       }});
       
       if(res.data){
-        setExpenses(res.data.reverse());
+        setExpenses(res.data.expenses.reverse());
+        setPages(res.data.pages);
       }
     }catch(err){
       console.log(err);
     }  
-  },[token]);
+    setLoading(false);
+  },[token, page]);
 
   useEffect(()=>{    
     loadExpenses()
   }, [load, loadExpenses]);
 
-  
+  //update page that triggers load expenses for that page
+  const prevPageHandler = () => {
+    if(page>1){
+      setPage(prev=>prev-1)
+    }
+  }
+
+  const nextPageHandler = () => {
+    if(page<pages){
+      setPage(prev=>prev+1)
+    }
+  }
   return (
     <Container fluid style={{paddingTop:'5rem'}}> 
           <Features setShowLeader = {setShowLeader} setLeaderData = {setLeaderData} setShowReport={setShowReport}/>
@@ -54,13 +70,22 @@ const Expenses = () => {
             </Row>
             {loading&&<Loader className='my-3 mx-auto'/>}
             <Row>
-              <Col xs lg="5" className='mx-auto'>
+              <Col xs lg="8" className='mx-auto'>
                <ExpenseList expenses={expenses} setLoad = {setLoad} setEdited={setEdited} setExpenses = {setExpenses}/>
+               <Pagination className='mx-auto fw-bold w-50 text-success'>
+                  <div className="d-flex mx-auto">
+                    <Pagination.Prev onClick={prevPageHandler}/>
+                    <Pagination.Item onClick={(e)=>{setPage(e.currentTarget.innerHTML)}}>{1}</Pagination.Item>
+                    <Pagination.Ellipsis/>
+                    <Pagination.Item onClick={(e)=>{setPage(e.currentTarget.innerHTML)}}>{pages}</Pagination.Item>
+                    <Pagination.Next onClick={nextPageHandler}/>
+                  </div>
+               </Pagination>
               </Col>
             </Row>
             </>
             :
-            <ExpenseReport expenses={expenses} setShowReport = {setShowReport}/>
+            <ExpenseReport setShowReport = {setShowReport}/>
           }
     </Container>
   )
