@@ -4,14 +4,17 @@ import ExpenseForm from './ExpenseForm'
 import ExpenseList from './ExpenseList'
 import Loader from '../Layout/Loader'
 import axios from 'axios'
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import Features from './Features'
 import LeaderBoard from './LeaderBoard'
 import ExpenseReport from './ExpenseReport'
+import { authActions } from '../../store/AuthReducer'
 
 const Expenses = () => {
   const [loading, setLoading] = useState(false);
   const token = useSelector(state=>state.auth.loginToken);
+  const rows = useSelector(state=>state.auth.rows);
+  const dispatch = useDispatch();
   const [expenses, setExpenses] = useState([]); 
   const [load, setLoad] = useState(true);
   const [edited, setEdited] = useState(null);
@@ -21,25 +24,24 @@ const Expenses = () => {
   const [page, setPage] = useState(1);
   const [pages, setPages] = useState(1);
   
-  
 //load from backend
   const loadExpenses = useCallback(async()=>{
     setLoading(true);
     try{
       //get expense page as specified
-      const res = await axios.get(`http://localhost:4000/expenses/paginated/${page}/3`, {headers: {
+      const res = await axios.get(`http://localhost:4000/expenses/paginated/${page}/${rows?rows:5}`, {headers: {
         'Authorization' : token
       }});
       
       if(res.data){
-        setExpenses(res.data.expenses.reverse());
+        setExpenses(res.data.expenses);
         setPages(res.data.pages);
       }
     }catch(err){
       console.log(err);
     }  
     setLoading(false);
-  },[token, page]);
+  },[token, page, rows]);
 
   useEffect(()=>{    
     loadExpenses()
@@ -57,6 +59,12 @@ const Expenses = () => {
       setPage(prev=>prev+1)
     }
   }
+
+  //change rows displayed per page
+  const rowsHandler = (val) => {
+    dispatch(authActions.setRowsPerPage({rows:val}));
+  }
+
   return (
     <Container fluid style={{paddingTop:'5rem'}}> 
           <Features setShowLeader = {setShowLeader} setLeaderData = {setLeaderData} setShowReport={setShowReport}/>
@@ -79,7 +87,14 @@ const Expenses = () => {
                     <Pagination.Ellipsis/>
                     <Pagination.Item onClick={(e)=>{setPage(e.currentTarget.innerHTML)}}>{pages}</Pagination.Item>
                     <Pagination.Next onClick={nextPageHandler}/>
-                  </div>
+                    <p className='mx-2'>Rows per page: </p>
+                      <select onChange={(e)=>rowsHandler(e.currentTarget.value)}>
+                        <option value={5}>5</option>
+                        <option value={10}>10</option>
+                        <option value={25}>25</option>
+                        <option value={50}>50</option>
+                      </select>
+                   </div>
                </Pagination>
               </Col>
             </Row>

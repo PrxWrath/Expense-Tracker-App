@@ -1,7 +1,8 @@
 import {createSlice} from '@reduxjs/toolkit';
 
 const token = localStorage.getItem('LOGIN_TOKEN');
-const initialState = {isLoggedIn: !!token, loginToken:token, premiumUser: token};
+const rows = localStorage.getItem('ROWS_PER_PAGE')
+const initialState = {isLoggedIn: !!token, loginToken:token, premiumUser: token, rows: rows};
 
 const authSlice = createSlice({
     name:'Authentication',
@@ -20,6 +21,10 @@ const authSlice = createSlice({
         },
         activatePremium(state){
             state.premiumUser = true;
+        },
+        setRowsPerPage(state,action){
+            state.rows = action.payload.rows;
+            localStorage.setItem('ROWS_PER_PAGE', state.rows);
         }
     }
 })

@@ -30,7 +30,7 @@ const ExpenseList = (props) => {
     return (
     <>
       {props.expenses?.length?
-      <div className='border border-success my-2 rounded w-100 fs-5'>
+      <div className='border border-success my-2 rounded w-100 fs-5' style={{height: '70vh'}}>
       <ListGroup.Item className="bg-success text-light text-center rounded-top w-100 p-1">
         <h3>-- Expenses --</h3>
       </ListGroup.Item>

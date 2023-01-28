@@ -41,16 +41,17 @@ exports.getExpenses = async(req,res,next) => {
 exports.getPaginatedExpenses = async(req,res,next) => {
     try{
         const user = req.user;
-        const limit = +req.params.limit;
+        let limit = +req.params.limit;
         const data = await user.getExpenses({offset:(req.params.page-1)*limit, limit:limit});
         const count  = await user.countExpenses();
         if(data){
             let pages;
-            if(count%limit === 0){
-                pages = count/limit
-            }else{
-                pages = count/(limit - 1) 
+            if(count%limit !== 0){
+                while(count%limit!==0 && limit){
+                    limit--;
+                } 
             }
+            pages = Math.floor(count/limit) //total no. of pages = total records/least possible limit
             res.json({expenses:data, pages});
         }
     }catch(err){
