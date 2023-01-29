@@ -1,13 +1,14 @@
 const Expense = require('../models/Expense');
 const AWS = require('aws-sdk');
+const logger = require('../services/logger');
 
 const uploadToS3 = (fileContent, fileName)=>{
     const s3Bucket = new AWS.S3({
-        accessKeyId: process.env.REACT_APP_IAM_ACCESS_KEY,
-        secretAccessKey: process.env.REACT_APP_IAM_SECRET,
+        accessKeyId: process.env.IAM_ACCESS_KEY,
+        secretAccessKey: process.env.IAM_SECRET,
     })    
     const params = {
-          Bucket: process.env.REACT_APP_S3_BUCKET,
+          Bucket: process.env.S3_BUCKET,
           Key: fileName,
           Body: fileContent,
           ACL: 'public-read'
@@ -15,8 +16,7 @@ const uploadToS3 = (fileContent, fileName)=>{
 
     return new Promise((resolve,reject)=>{
         s3Bucket.upload(params, (err, s3response)=>{
-            if(err){
-                console.log(err);
+            if(err){ 
                 reject(err);
             }else{
                 resolve(s3response.Location);
@@ -34,7 +34,7 @@ exports.getExpenses = async(req,res,next) => {
             res.json(data);
         }
     }catch(err){
-    console.log(err);
+        logger.write(err.stack)
     }
 }
 
@@ -55,7 +55,7 @@ exports.getPaginatedExpenses = async(req,res,next) => {
             res.json({expenses:data, pages});
         }
     }catch(err){
-        console.log(err);
+        logger.write(err.stack)
     }
 }
 
@@ -69,7 +69,7 @@ exports.postAddExpense = async(req,res,next) => {
         })
         res.status(200).json({msg:'Created new expense'});
     }catch(err){
-        console.log(err);
+        logger.write(err.stack)
     }
 }
 
@@ -82,7 +82,7 @@ exports.postDeleteExpense = async(req,res,next) => {
             res.status(200).json({msg:'Deleted expense'});
         }
     }catch(err){
-        console.log(err);
+        logger.write(err.stack)
     }
 }
 
@@ -96,7 +96,7 @@ exports.postEditExpense = async(req,res,next) => {
         await expense.save();
         res.status(200).json({msg:'Updated expense'});
     }catch(err){
-        console.log(err);
+        logger.write(err.stack)
     }
 }
 
@@ -111,7 +111,7 @@ exports.getDownloadExpenses = async(req,res,next) => {
         })
         res.status(200).json({fileUrl});
     }catch(err){
-        console.log(err)
+        logger.write(err.stack)
     }
 }
 
@@ -120,6 +120,6 @@ exports.getFileUrls = async(req,res,next)=>{
         const urls = await req.user.getFileurls();
         res.status(200).json({urls});
     }catch(err){
-        console.log(err)
+        logger.write(err.stack)
     }
 }

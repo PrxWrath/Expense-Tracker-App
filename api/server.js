@@ -11,11 +11,19 @@ const Expense = require('./models/Expense');
 const Order = require('./models/Order');
 const ForgotRequest = require('./models/Forgot');
 const File = require('./models/File');
+const helmet = require('helmet');
+const fs = require('fs');
+const path = require('path');
+const morgan = require('morgan');
 require('dotenv').config();
 
 const app = express();
+const logStream = fs.createWriteStream(path.join(__dirname, 'server.log'), {flags:'a'});
 
+app.use(helmet());
 app.use(cors());
+app.use(morgan('combined', {stream: logStream}));
+
 app.use(bodyParser.json({extended:false}));
 app.use(bodyParser.urlencoded({extended:false}));
 app.use('/users', userRoute);
@@ -36,7 +44,7 @@ User.hasMany(File);
 File.belongsTo(User);
 
 sequelize.sync().then(res=>{
-    app.listen(4000);
+    app.listen(process.env.PORT || 4000);
 })
 .catch(err=>{
     console.log(err);

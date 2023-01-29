@@ -1,11 +1,12 @@
 const razorpay = require('razorpay');
 const Order = require('../models/Order');
+const logger = require('../services/logger');
 
 exports.getPurchasePremium = (req,res,next) => {
     try{
         const rzp = new razorpay({
-            key_id: process.env.REACT_APP_RZP_KEY_ID,
-            key_secret: process.env.REACT_APP_RZP_KEY_SECRET
+            key_id: process.env.RZP_KEY_ID,
+            key_secret: process.env.RZP_KEY_SECRET
         }) 
 
         const amount = 2500;
@@ -20,7 +21,7 @@ exports.getPurchasePremium = (req,res,next) => {
             res.status(201).json({order, key_id: rzp.key_id})
         })
     }catch(err){
-        console.log(err)
+        logger.write(err.stack)
     }   
 }
 
@@ -40,6 +41,6 @@ exports.postUpdateStatus = async(req,res,next) => {
         }
         await order.save();
     }catch(err){
-        console.log(err)
+        logger.write(err.stack)
     }
 }

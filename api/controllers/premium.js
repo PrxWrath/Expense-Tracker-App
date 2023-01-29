@@ -1,4 +1,5 @@
 const sequelize = require('../util/database');
+const logger = require('../services/logger');
 
 exports.getShowLeaders = async(req,res,next) => {
     try{
@@ -10,6 +11,6 @@ exports.getShowLeaders = async(req,res,next) => {
         
         res.status(201).json({leaders:data[0]})
     }catch(err){
-        console.log(err)
+        logger.write(err.stack);
     }
 }

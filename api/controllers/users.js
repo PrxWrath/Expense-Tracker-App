@@ -3,9 +3,10 @@ const ForgotRequest = require('../models/Forgot');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const {v4: uuid4} = require('uuid');
+const logger = require('../services/logger');
 
 const generateToken = (id, name) => {
-    return jwt.sign({userId: id, name}, process.env.REACT_APP_USER_SECRET); //encrypt the userID to produce a unique token
+    return jwt.sign({userId: id, name}, process.env.USER_SECRET); //encrypt the userID to produce a unique token
 }
 
 exports.postAddUser = async(req,res,next) => {
@@ -27,7 +28,7 @@ exports.postAddUser = async(req,res,next) => {
         }
         
     }catch(err){
-        console.log(err)
+        logger.write(err.stack);
     }
 }
 
@@ -47,7 +48,7 @@ exports.postFindUser = async(req,res,next) => {
             })
         }
     }catch(err){
-        console.log(err)
+        logger.write(err.stack);
     }
 }
 
@@ -66,7 +67,7 @@ exports.postForgotPassword = async(req,res,next) => {
             res.json({err:'User not found!'});
         }
     }catch(err){
-        console.log(err)
+        logger.write(err.stack);
     }
     
 }
@@ -85,13 +86,12 @@ exports.getResetPassword = async(req,res,next) => {
             <button type="submit">Reset Password</button>
         </form>`)
     }catch(err){
-        console.log(err)
+        logger.write(err.stack);
     }  
 }
 
 exports.postResetPassword = async(req,res,next) => {
     try{   
-        console.log(req.body)
         const reset_id = req.body.reset_id;
         const reset_pass = req.body.new_pass;
         const request = await ForgotRequest.findOne({where:{id:reset_id}}); //find the request with the given uuid
@@ -106,6 +106,6 @@ exports.postResetPassword = async(req,res,next) => {
             res.send('<h3>Password Changed! Go back and login with new password</h3>') 
         }
     }catch(err){
-        console.log(err)
+        logger.write(err.stack);
     }
 }
