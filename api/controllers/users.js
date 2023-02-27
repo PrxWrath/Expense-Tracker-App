@@ -1,17 +1,17 @@
 const User = require('../models/user');
-const ForgotRequest = require('../models/Forgot');
+const Forgot = require('../models/Forgot');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
-const {v4: uuid4} = require('uuid');
 const logger = require('../services/logger');
+const { default: mongoose } = require('mongoose');
 
-const generateToken = (id, name) => {
-    return jwt.sign({userId: id, name}, process.env.USER_SECRET); //encrypt the userID to produce a unique token
+const generateToken = (email, name) => {
+    return jwt.sign({email, name}, process.env.USER_SECRET); //encrypt the userID to produce a unique token
 }
 
 exports.postAddUser = async(req,res,next) => {
     try{
-        const data = await User.findOne({where: {email:req.body.email}});
+        const data = await User.findOne({email: req.body.email})
         if(data){
             res.json({
                 error: 'Account with provided email already exists!'
@@ -34,7 +34,7 @@ exports.postAddUser = async(req,res,next) => {
 
 exports.postFindUser = async(req,res,next) => {
     try{
-        const data = await User.findOne({where:{email:req.body.email}});
+        const data = await User.findOne({email:req.body.email});
         if(!data){
             res.json({err: 'User not found!'}).status(404);
         }else{
@@ -42,7 +42,7 @@ exports.postFindUser = async(req,res,next) => {
                 if(!cmp){
                     res.json({err: 'Invalid Credentials! User not authorized'}).status(401);
                 }else{
-                    const token = generateToken(data.id, data.name);
+                    const token = generateToken(data.email, data.name);
                     res.status(200).json({token: token, premium: data.isPremium , msg:'User login successfull'}); //send login token and premium status
                 }
             })
@@ -54,14 +54,14 @@ exports.postFindUser = async(req,res,next) => {
 
 exports.postForgotPassword = async(req,res,next) => {
     try{
-        const user = await User.findOne({where:{email:req.body.email}}); 
+        const user = await User.findOne({email:req.body.email}); 
         if(user){
-            let reset_id = uuid4();
             //create new reset password request
-            await user.createForgotpassword({
-                id:reset_id,
-                isActive: true
+            const request = await Forgot.create({
+                isActive: true,
+                userId: user._id
             });
+            let reset_id = request._id;
             res.status(200).json({url:`http://localhost:4000/users/reset-password/${reset_id}`});
         }else{
             res.json({err:'User not found!'});
@@ -94,17 +94,18 @@ exports.postResetPassword = async(req,res,next) => {
     try{   
         const reset_id = req.body.reset_id;
         const reset_pass = req.body.new_pass;
-        const request = await ForgotRequest.findOne({where:{id:reset_id}}); //find the request with the given uuid
+        const request = await Forgot.findById(reset_id); //find the request with the given id
+    
         if(request){
-            request.isActive = false; //one-time reset request
-            const user = await User.findOne({where:{id:request.userId}});
+            const user = await User.findById(request.userId);
             bcrypt.hash(reset_pass, 10, async(err, hash)=>{
                 user.password = hash
                 await user.save();   
             })
-            await request.save();
+            await Forgot.deleteOne({_id: reset_id}); //remove the request after reset
             res.send('<h3>Password Changed! Go back and login with new password</h3>') 
         }
+        else res.status(400);
     }catch(err){
         logger.write(err.stack);
     }

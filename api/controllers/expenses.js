@@ -1,6 +1,7 @@
 const Expense = require('../models/Expense');
 const AWS = require('aws-sdk');
 const logger = require('../services/logger');
+const File = require('../models/File');
 
 const uploadToS3 = (fileContent, fileName)=>{
     const s3Bucket = new AWS.S3({
@@ -29,7 +30,7 @@ const uploadToS3 = (fileContent, fileName)=>{
 exports.getExpenses = async(req,res,next) => {
     try{
         const user = req.user;
-        const data = await user.getExpenses();
+        const data = await Expense.find({userId: user._id});
         if(data){
             res.json(data);
         }
@@ -42,8 +43,8 @@ exports.getPaginatedExpenses = async(req,res,next) => {
     try{
         const user = req.user;
         let limit = +req.params.limit;
-        const data = await user.getExpenses({offset:(req.params.page-1)*limit, limit:limit});
-        const count  = await user.countExpenses();
+        const data = await Expense.find({userId: user._id}).skip((req.params.page-1)*limit).limit(limit);
+        const count  = data.length;
         if(data){
             let pages;
             if(count%limit !== 0){
@@ -51,7 +52,7 @@ exports.getPaginatedExpenses = async(req,res,next) => {
                     limit--;
                 } 
             }
-            pages = Math.floor(count/limit) //total no. of pages = total records/least possible limit
+            pages = Math.floor(count/limit) //total no. of pages = total records/max possible limit
             res.json({expenses:data, pages});
         }
     }catch(err){
@@ -62,10 +63,12 @@ exports.getPaginatedExpenses = async(req,res,next) => {
 exports.postAddExpense = async(req,res,next) => {
     try{
         const user = req.user;
-        await user.createExpense({
+        await Expense.create({
             amount: req.body.amount,
             category: req.body.category,
-            description: req.body.description
+            description: req.body.description,
+            updatedAt: new Date(),
+            userId: user._id
         })
         res.status(200).json({msg:'Created new expense'});
     }catch(err){
@@ -76,11 +79,8 @@ exports.postAddExpense = async(req,res,next) => {
 exports.postDeleteExpense = async(req,res,next) => {
     try{
         const id = req.body.id;
-        const expense = await Expense.findByPk(id);
-        if(expense){
-            await expense.destroy();
-            res.status(200).json({msg:'Deleted expense'});
-        }
+        await Expense.deleteOne({_id:id});
+        res.status(200).json({msg:'Deleted expense'});
     }catch(err){
         logger.write(err.stack)
     }
@@ -89,11 +89,8 @@ exports.postDeleteExpense = async(req,res,next) => {
 exports.postEditExpense = async(req,res,next) => {
     try{
         const id = req.body.id;
-        const expense = await Expense.findByPk(id);
-        expense.amount = req.body.amount;
-        expense.description = req.body.description;
-        expense.category  = req.body.category;
-        await expense.save();
+        console.log(id)
+        await Expense.updateOne({_id: id}, {amount: req.body.amount, description: req.body.description, category: req.body.category, updatedAt: new Date()});
         res.status(200).json({msg:'Updated expense'});
     }catch(err){
         logger.write(err.stack)
@@ -102,12 +99,14 @@ exports.postEditExpense = async(req,res,next) => {
 
 exports.getDownloadExpenses = async(req,res,next) => {
     try{
-        const expenses = await req.user.getExpenses({attributes:['amount', 'description', 'category', 'createdAt', 'updatedAt']});
+        const expenses = await Expense.find({_id: req.user._id}, 'amount description category updatedAt');
         const fileName = `Expenses${req.user.id}/${new Date()}.txt`;
         const fileContent = JSON.stringify(expenses);
         const fileUrl = await uploadToS3(fileContent, fileName);
-        await req.user.createFileurl({
-            url: fileUrl
+        await File.create({
+            url: fileUrl,
+            userId: req.user._id,
+            updatedAt: new Date()
         })
         res.status(200).json({fileUrl});
     }catch(err){
@@ -117,7 +116,7 @@ exports.getDownloadExpenses = async(req,res,next) => {
 
 exports.getFileUrls = async(req,res,next)=>{
     try{
-        const urls = await req.user.getFileurls();
+        const urls = await File.find({userId: req.user._id});
         res.status(200).json({urls});
     }catch(err){
         logger.write(err.stack)

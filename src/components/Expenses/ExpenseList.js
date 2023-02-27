@@ -14,7 +14,7 @@ const ExpenseList = (props) => {
     const deleteExpenseHandler = async(expense) => {
       try{
         let expenseId = {
-          id: expense.id
+          id: expense._id
         }
         const res = await axios.post('http://localhost:4000/expenses/delete-expense',expenseId, {headers: {
           'Authorization' : token

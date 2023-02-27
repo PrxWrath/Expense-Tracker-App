@@ -39,7 +39,7 @@ const ExpenseForm = (props) => {
                       }});
                 }else{
                     let expense = {
-                        id: props.edited.id,
+                        id: props.edited._id,
                         amount: amountRef.current.value,
                         category: categoryRef.current.value,
                         description: descRef.current.value

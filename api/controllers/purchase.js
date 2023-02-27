@@ -14,9 +14,10 @@ exports.getPurchasePremium = (req,res,next) => {
             if(err){
                 throw new Error(JSON.stringify(err))
             }
-            await req.user.createOrder({
+            await Order.create({
                 orderID: order.id,
-                status: 'PENDING'
+                status: 'PENDING',
+                userId: req.user.payment_Id
             })
             res.status(201).json({order, key_id: rzp.key_id})
         })
@@ -27,19 +28,19 @@ exports.getPurchasePremium = (req,res,next) => {
 
 exports.postUpdateStatus = async(req,res,next) => {
     try{
-        await Order.update({status:'FAILED'}, {where:{status:'PENDING', userId:req.user.id}}); //fail all the prior pending payments of user
-        const order = await Order.findOne({where: {orderID: req.body.order_Id}});
+        await Order.updateOne({status:'PENDING', userId: req.user._id}, {status:'FAILED'}); //fail all the prior pending payments of user
+        const order = await Order.findOne({orderID: req.body.order_Id});
         if(order){
            if(req.body.payment_Id!==null){
                 order.paymentID = req.body.payment_Id,
                 order.status = 'SUCCESSFUL'
                 req.user.isPremium = true;
                 await req.user.save();
+                await order.update({paymentID: req.body.payment_Id, status:'SUCCESSFUL'});
             }else{
-                order.status = 'FAILED'
+                await order.update({status:'FAILED'});
             }
         }
-        await order.save();
     }catch(err){
         logger.write(err.stack)
     }

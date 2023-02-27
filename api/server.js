@@ -1,7 +1,7 @@
 const express = require('express');
 const cors = require('cors');
 const bodyParser = require('body-parser');
-const sequelize = require('./util/database');
+const mongoose = require('mongoose');
 const userRoute = require('./routes/users');
 const expenseRoute = require('./routes/expenses');
 const purchaseRoute = require('./routes/purchase');
@@ -34,18 +34,10 @@ app.use((req,res,next)=>{
     res.send('<h1>Backend Running :)</h1>');
 })
 
-Expense.belongsTo(User);
-User.hasMany(Expense);
-User.hasMany(Order);
-Order.belongsTo(User);
-User.hasMany(ForgotRequest);
-ForgotRequest.belongsTo(User);
-User.hasMany(File);
-File.belongsTo(User);
-
-sequelize.sync().then(res=>{
-    app.listen(process.env.PORT || 4000);
+mongoose.connect(process.env.MONGO_CONNECT_URL)
+.then(res=>{
+    app.listen(4000);
 })
 .catch(err=>{
-    console.log(err);
+    console.log(err)
 })
